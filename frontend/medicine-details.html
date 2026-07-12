@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Details - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Plus</span></a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="medicines.html">Medicines</a>
+                <a href="cart.html" class="auth-only hidden cart-icon">Cart <span id="cart-badge" class="cart-badge hidden">0</span></a>
+                <a href="orders.html" class="auth-only hidden">Orders</a>
+                <a href="login.html" class="guest-only">Login</a>
+                <a href="register.html" class="guest-only btn btn-primary" style="color: white;">Register</a>
+                <a href="admin-dashboard.html" class="admin-only hidden">Admin</a>
+                <a href="#" class="auth-only hidden logout-btn">Logout</a>
+                <a href="profile.html" class="auth-only hidden user-name" style="font-weight: bold; color: var(--primary-green);"></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5" id="detail-container">
+        <div class="loader"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function initMedicineDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const container = document.getElementById('detail-container');
+            
+            if (!id) {
+                container.innerHTML = '<p>Medicine not found.</p>';
+                return;
+            }
+
+            fetchAPI(`/medicines/${id}`).then(med => {
+                container.innerHTML = `
+                    <div class="card d-flex flex-wrap gap-3">
+                        <img src="${med.image || 'https://via.placeholder.com/400'}" alt="${med.medicineName}" style="max-width: 400px; width: 100%; border-radius: var(--radius-md);">
+                        <div style="flex: 1; min-width: 300px;">
+                            <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">${med.medicineName}</h2>
+                            <p class="badge badge-pending mb-2" style="display:inline-block;">${med.category}</p>
+                            <h3 style="color: var(--primary-blue); font-size: 2rem; margin-bottom: 1.5rem;">$${med.price.toFixed(2)}</h3>
+                            
+                            <div class="mb-3">
+                                <strong>Brand:</strong> ${med.brand}<br>
+                                <strong>Manufacturer:</strong> ${med.manufacturer}<br>
+                                <strong>In Stock:</strong> ${med.stock} units<br>
+                                <strong>Expiry Date:</strong> ${med.expiryDate || 'N/A'}
+                            </div>
+                            
+                            <p class="mb-4" style="color: var(--text-muted); line-height: 1.8;">${med.description}</p>
+                            
+                            <button class="btn btn-primary btn-lg" style="width: 200px;" onclick="addToCart('${med._id}')">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+            }).catch(() => {
+                container.innerHTML = '<p>Failed to load details.</p>';
+            });
+        }
+    </script>
+</body>
+</html>

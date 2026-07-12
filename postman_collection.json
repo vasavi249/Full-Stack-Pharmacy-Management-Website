@@ -1,0 +1,44 @@
+{
+    "info": {
+        "name": "Pharmacy Management API",
+        "description": "API collection for Pharmacy Management Website",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [{"key": "Content-Type", "value": "application/json"}],
+                        "url": {"raw": "http://localhost:8000/api/register", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "register"]},
+                        "body": {"mode": "raw", "raw": "{\"name\":\"Test User\",\"email\":\"test@test.com\",\"password\":\"123456\",\"role\":\"customer\"}"}
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [{"key": "Content-Type", "value": "application/json"}],
+                        "url": {"raw": "http://localhost:8000/api/login", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "login"]},
+                        "body": {"mode": "raw", "raw": "{\"email\":\"admin@pharmacy.com\",\"password\":\"admin123\"}"}
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Medicines",
+            "item": [
+                {
+                    "name": "Get All Medicines",
+                    "request": {
+                        "method": "GET",
+                        "url": {"raw": "http://localhost:8000/api/medicines", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "medicines"]}
+                    }
+                }
+            ]
+        }
+    ]
+}

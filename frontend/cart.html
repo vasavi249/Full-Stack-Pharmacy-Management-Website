@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Plus</span></a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="medicines.html">Medicines</a>
+                <a href="cart.html" class="auth-only hidden cart-icon" style="color: var(--primary-blue); font-weight: bold;">Cart <span id="cart-badge" class="cart-badge hidden">0</span></a>
+                <a href="orders.html" class="auth-only hidden">Orders</a>
+                <a href="login.html" class="guest-only">Login</a>
+                <a href="register.html" class="guest-only btn btn-primary" style="color: white;">Register</a>
+                <a href="admin-dashboard.html" class="admin-only hidden">Admin</a>
+                <a href="#" class="auth-only hidden logout-btn">Logout</a>
+                <a href="profile.html" class="auth-only hidden user-name" style="font-weight: bold; color: var(--primary-green);"></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h2 class="section-title">Your Shopping Cart</h2>
+        <div class="d-flex flex-wrap gap-3">
+            <div id="cart-items" style="flex: 2; min-width: 300px;">
+                <div class="loader"></div>
+            </div>
+            <div class="card" style="flex: 1; min-width: 250px; height: fit-content;">
+                <h3>Order Summary</h3>
+                <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--border-color);">
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total Amount:</strong>
+                    <strong id="cart-total" style="color: var(--primary-blue); font-size: 1.5rem;">$0.00</strong>
+                </div>
+                <a href="checkout.html" class="btn btn-success" style="width: 100%;">Proceed to Checkout</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

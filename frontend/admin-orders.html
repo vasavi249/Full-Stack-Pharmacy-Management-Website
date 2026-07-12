@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Admin</span></a>
+            <div class="nav-links">
+                <a href="#" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <a href="admin-dashboard.html">Dashboard</a>
+                <a href="admin-medicines.html">Medicines</a>
+                <a href="admin-categories.html">Categories</a>
+                <a href="admin-orders.html" class="active">Orders</a>
+                <a href="admin-users.html">Users</a>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <h2 class="mb-4">Manage Orders</h2>
+            
+            <div class="card table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if(!isAdmin()) return window.location.href = 'index.html';
+            loadTable();
+        });
+
+        async function loadTable() {
+            const tbody = document.getElementById('orders-table');
+            try {
+                const orders = await fetchAPI('/orders');
+                const statuses = ['Pending', 'Confirmed', 'Packed', 'Dispatched', 'Delivered', 'Cancelled'];
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td>#${order._id.substring(0,8)}</td>
+                        <td>${order.user?.name || 'Unknown'}<br><small>${order.user?.email}</small></td>
+                        <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td>$${order.totalAmount.toFixed(2)}</td>
+                        <td><span class="badge badge-${order.status.toLowerCase()}">${order.status}</span></td>
+                        <td>
+                            <select onchange="updateOrderStatus('${order._id}', this.value)" style="padding: 0.25rem;">
+                                ${statuses.map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+                            </select>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6">Failed to load</td></tr>';
+            }
+        }
+
+        async function updateOrderStatus(id, status) {
+            try {
+                await fetchAPI(`/orders/${id}`, { 
+                    method: 'PUT',
+                    body: JSON.stringify({ status })
+                });
+                showToast('Order status updated');
+                loadTable();
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>

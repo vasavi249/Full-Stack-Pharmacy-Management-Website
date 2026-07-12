@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Admin</span></a>
+            <div class="nav-links">
+                <a href="#" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <a href="admin-dashboard.html">Dashboard</a>
+                <a href="admin-medicines.html">Medicines</a>
+                <a href="admin-categories.html">Categories</a>
+                <a href="admin-orders.html">Orders</a>
+                <a href="admin-users.html" class="active">Users</a>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <h2 class="mb-4">Manage Users</h2>
+            
+            <div class="card table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Registered Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if(!isAdmin()) return window.location.href = 'index.html';
+            loadTable();
+        });
+
+        async function loadTable() {
+            const tbody = document.getElementById('users-table');
+            try {
+                const users = await fetchAPI('/dashboard/users');
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td>#${user._id.substring(0,8)}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone || 'N/A'}</td>
+                        <td><span class="badge ${user.status === 'blocked' ? 'badge-cancelled' : 'badge-delivered'}">${user.status || 'active'}</span></td>
+                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-${user.status === 'blocked' ? 'success' : 'warning'}" onclick="toggleStatus('${user._id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 5px;">
+                                ${user.status === 'blocked' ? 'Activate' : 'Block'}
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteUser('${user._id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="7">Failed to load</td></tr>';
+            }
+        }
+
+        async function deleteUser(id) {
+            if(!confirm('Are you sure you want to delete this user?')) return;
+            try {
+                await fetchAPI(`/dashboard/users/${id}`, { method: 'DELETE' });
+                showToast('User deleted');
+                loadTable();
+            } catch(e) {}
+        }
+        
+        async function toggleStatus(id) {
+            if(!confirm('Are you sure you want to change this user\'s status?')) return;
+            try {
+                await fetchAPI(`/dashboard/users/${id}/toggle-status`, { method: 'PUT' });
+                showToast('User status updated');
+                loadTable();
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>

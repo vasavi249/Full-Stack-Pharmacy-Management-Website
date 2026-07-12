@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Medicines - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Admin</span></a>
+            <div class="nav-links">
+                <a href="#" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <a href="admin-dashboard.html">Dashboard</a>
+                <a href="admin-medicines.html" class="active">Medicines</a>
+                <a href="admin-categories.html">Categories</a>
+                <a href="admin-orders.html">Orders</a>
+                <a href="admin-users.html">Users</a>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Manage Medicines</h2>
+                <button class="btn btn-primary" onclick="document.getElementById('add-med-modal').classList.remove('hidden')">Add Medicine</button>
+            </div>
+            
+            <div class="card table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="medicines-table">
+                        <div class="loader"></div>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Modal -->
+            <div id="add-med-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:9999;">
+                <div class="card" style="width: 500px; max-height: 90vh; overflow-y: auto;">
+                    <h3 class="mb-3">Add Medicine</h3>
+                    <form id="add-med-form">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="medicineName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <input type="text" name="category" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Brand</label>
+                            <input type="text" name="brand" class="form-control">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">Price</label>
+                                <input type="number" step="0.01" name="price" class="form-control" required>
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">Stock</label>
+                                <input type="number" name="stock" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Image URL</label>
+                            <input type="text" name="image" class="form-control">
+                        </div>
+                        <div class="d-flex gap-2 mt-3">
+                            <button type="submit" class="btn btn-success flex-1">Save</button>
+                            <button type="button" class="btn btn-danger flex-1" onclick="document.getElementById('add-med-modal').classList.add('hidden')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function initAdminMedicines() {
+            if(!isAdmin()) return window.location.href = 'index.html';
+            loadTable();
+
+            document.getElementById('add-med-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
+                try {
+                    await fetchAPI('/medicines', { method: 'POST', body: JSON.stringify(data) });
+                    showToast('Medicine added successfully');
+                    document.getElementById('add-med-modal').classList.add('hidden');
+                    e.target.reset();
+                    loadTable();
+                } catch(e) {}
+            });
+        }
+
+        async function loadTable() {
+            const tbody = document.getElementById('medicines-table');
+            try {
+                const meds = await fetchAPI('/medicines');
+                tbody.innerHTML = meds.map(med => `
+                    <tr>
+                        <td><img src="${med.image || 'https://via.placeholder.com/50'}" style="width:50px; height:50px; object-fit:cover;"></td>
+                        <td>${med.medicineName}</td>
+                        <td>${med.category}</td>
+                        <td>$${med.price.toFixed(2)}</td>
+                        <td>${med.stock}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteMed('${med._id}')" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6">Failed to load</td></tr>';
+            }
+        }
+
+        async function deleteMed(id) {
+            if(!confirm('Are you sure you want to delete this medicine?')) return;
+            try {
+                await fetchAPI(`/medicines/${id}`, { method: 'DELETE' });
+                showToast('Deleted');
+                loadTable();
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>

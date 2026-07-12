@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Plus</span></a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="medicines.html">Medicines</a>
+                <a href="cart.html" class="auth-only hidden cart-icon">Cart <span id="cart-badge" class="cart-badge hidden">0</span></a>
+                <a href="orders.html" class="auth-only hidden">Orders</a>
+                <a href="login.html" class="guest-only">Login</a>
+                <a href="register.html" class="guest-only btn btn-primary" style="color: white;">Register</a>
+                <a href="admin-dashboard.html" class="admin-only hidden">Admin</a>
+                <a href="#" class="auth-only hidden logout-btn">Logout</a>
+                <a href="profile.html" class="auth-only hidden user-name" style="font-weight: bold; color: var(--primary-green);"></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <h2 class="mb-4">My Profile</h2>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" id="profile-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address (Cannot be changed)</label>
+                    <input type="email" id="profile-email" class="form-control" readonly style="background: #e9ecef;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" id="profile-phone" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" id="profile-address" class="form-control" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+            
+            <hr class="my-4">
+            
+            <h3 class="mb-3">Change Password</h3>
+            <form id="password-form">
+                <div class="form-group">
+                    <label class="form-label">Old Password</label>
+                    <input type="password" name="oldPassword" class="form-control" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" name="newPassword" class="form-control" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const user = await fetchAPI('/profile');
+                document.getElementById('profile-name').value = user.name || '';
+                document.getElementById('profile-email').value = user.email || '';
+                document.getElementById('profile-phone').value = user.phone || '';
+                document.getElementById('profile-address').value = user.address || '';
+            } catch(e) {}
+
+            document.getElementById('profile-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
+                
+                try {
+                    await fetchAPI('/profile', {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Profile updated successfully');
+                    
+                    const localUser = getUser();
+                    localUser.name = data.name;
+                    localStorage.setItem('user', JSON.stringify(localUser));
+                    updateNav();
+                } catch(e) {}
+            });
+            
+            document.getElementById('password-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
+                
+                try {
+                    await fetchAPI('/profile/password', {
+                        method: 'PUT',
+                        body: JSON.stringify(data)
+                    });
+                    showToast('Password changed successfully');
+                    e.target.reset();
+                } catch(e) {}
+            });
+        });
+    </script>
+</body>
+</html>

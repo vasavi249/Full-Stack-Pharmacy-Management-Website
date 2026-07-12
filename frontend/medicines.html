@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicines - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Plus</span></a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="medicines.html" style="color: var(--primary-blue); font-weight: bold;">Medicines</a>
+                <a href="cart.html" class="auth-only hidden cart-icon">Cart <span id="cart-badge" class="cart-badge hidden">0</span></a>
+                <a href="orders.html" class="auth-only hidden">Orders</a>
+                <a href="login.html" class="guest-only">Login</a>
+                <a href="register.html" class="guest-only btn btn-primary" style="color: white;">Register</a>
+                <a href="admin-dashboard.html" class="admin-only hidden">Admin</a>
+                <a href="#" class="auth-only hidden logout-btn">Logout</a>
+                <a href="profile.html" class="auth-only hidden user-name" style="font-weight: bold; color: var(--primary-green);"></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2>All Medicines</h2>
+            <div class="filters-container d-flex gap-2">
+                <input type="text" id="search-input" placeholder="Search medicines..." class="form-control" style="max-width: 200px;">
+                
+                <select id="category-filter" class="form-control" style="max-width: 150px;">
+                    <option value="">All Categories</option>
+                    <!-- Categories loaded dynamically -->
+                </select>
+                
+                <select id="sort-filter" class="form-control" style="max-width: 150px;">
+                    <option value="">Sort By</option>
+                    <option value="name_asc">Name (A-Z)</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="price_asc">Price (Low-High)</option>
+                    <option value="price_desc">Price (High-Low)</option>
+                </select>
+                
+                <button class="btn btn-primary" id="apply-filters-btn">Apply</button>
+            </div>
+        </div>
+        
+        <div class="grid" id="medicines-grid">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

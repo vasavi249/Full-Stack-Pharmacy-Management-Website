@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Management Website</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Plus</span></a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="medicines.html">Medicines</a>
+                <a href="cart.html" class="auth-only hidden cart-icon">Cart <span id="cart-badge" class="cart-badge hidden">0</span></a>
+                <a href="orders.html" class="auth-only hidden">Orders</a>
+                <a href="login.html" class="guest-only">Login</a>
+                <a href="register.html" class="guest-only btn btn-primary" style="color: white;">Register</a>
+                <a href="admin-dashboard.html" class="admin-only hidden">Admin</a>
+                <a href="#" class="auth-only hidden logout-btn">Logout</a>
+                <a href="profile.html" class="auth-only hidden user-name" style="font-weight: bold; color: var(--primary-green);"></a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container d-flex align-items-center justify-content-between">
+            <div class="hero-content">
+                <h1>Your Health, Our Priority</h1>
+                <p>Get authentic medicines delivered to your doorstep. Fast, reliable, and secure.</p>
+                <div class="search-bar">
+                    <input type="text" id="home-search" placeholder="Search for medicines, brands, categories...">
+                    <button class="btn btn-primary" onclick="window.location.href='medicines.html'">Search</button>
+                </div>
+            </div>
+            <div class="hero-shape"></div>
+        </div>
+    </header>
+
+    <section class="container py-5">
+        <div class="card" style="background: linear-gradient(135deg, var(--primary-green) 0%, #10b981 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 3rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 style="color: white; margin-bottom: 0.5rem;">Special Offer! Get 20% Off</h2>
+                    <p style="color: rgba(255,255,255,0.9);">Use code <strong>HEALTH20</strong> at checkout on your first order.</p>
+                </div>
+                <a href="medicines.html" class="btn" style="background: white; color: var(--primary-green);">Shop Now</a>
+            </div>
+        </div>
+
+        <h2 class="section-title">Featured Categories</h2>
+        <div class="grid mb-5" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="card text-center" style="cursor: pointer;" onclick="window.location.href='medicines.html'">
+                <h3>Pain Relief</h3>
+                <p>Relieve aches and fever</p>
+            </div>
+            <div class="card text-center" style="cursor: pointer;" onclick="window.location.href='medicines.html'">
+                <h3>Diabetes</h3>
+                <p>Manage blood sugar</p>
+            </div>
+            <div class="card text-center" style="cursor: pointer;" onclick="window.location.href='medicines.html'">
+                <h3>Skin Care</h3>
+                <p>Dermatologist approved</p>
+            </div>
+            <div class="card text-center" style="cursor: pointer;" onclick="window.location.href='medicines.html'">
+                <h3>Vitamins</h3>
+                <p>Boost your immunity</p>
+            </div>
+        </div>
+
+        <h2 class="section-title">Featured Medicines</h2>
+        <div class="grid" id="featured-medicines">
+            <!-- Populated via JS -->
+            <div class="loader"></div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="medicines.html" class="btn btn-outline">View All Medicines</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="index.html" class="logo" style="color:white;">Pharma<span style="color:var(--primary-green);">Plus</span></a>
+                    <p class="mt-2" style="color:#cbd5e1;">Your trusted online pharmacy for all your medical needs.</p>
+                </div>
+                <div class="footer-col footer-links">
+                    <h3>Quick Links</h3>
+                    <a href="index.html">Home</a>
+                    <a href="medicines.html">Medicines</a>
+                </div>
+                <div class="footer-col footer-links">
+                    <h3>Contact Us</h3>
+                    <a href="#">support@pharmaplus.com</a>
+                    <a href="#">+1 234 567 8900</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 PharmaPlus. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('featured-medicines');
+            try {
+                const meds = await fetchAPI('/medicines');
+                container.innerHTML = meds.slice(0, 4).map(med => `
+                    <div class="card medicine-card">
+                        <img src="${med.image || 'https://via.placeholder.com/200'}" alt="${med.medicineName}" class="medicine-img">
+                        <h3 class="medicine-title">${med.medicineName}</h3>
+                        <p class="medicine-category">${med.category}</p>
+                        <div class="medicine-price">₹${med.price.toFixed(2)}</div>
+                        <button class="btn btn-primary" onclick="addToCart('${med._id}')">Add to Cart</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                container.innerHTML = '<p class="text-center">Failed to load medicines.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

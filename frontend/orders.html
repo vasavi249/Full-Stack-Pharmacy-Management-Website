@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Plus</span></a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="medicines.html">Medicines</a>
+                <a href="cart.html" class="auth-only hidden cart-icon">Cart <span id="cart-badge" class="cart-badge hidden">0</span></a>
+                <a href="orders.html" class="auth-only hidden" style="color: var(--primary-blue); font-weight: bold;">Orders</a>
+                <a href="login.html" class="guest-only">Login</a>
+                <a href="register.html" class="guest-only btn btn-primary" style="color: white;">Register</a>
+                <a href="admin-dashboard.html" class="admin-only hidden">Admin</a>
+                <a href="#" class="auth-only hidden logout-btn">Logout</a>
+                <a href="profile.html" class="auth-only hidden user-name" style="font-weight: bold; color: var(--primary-green);"></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h2 class="section-title">My Orders</h2>
+        <div id="orders-container">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function initOrders() {
+            const container = document.getElementById('orders-container');
+            fetchAPI('/orders').then(orders => {
+                if (orders.length === 0) {
+                    container.innerHTML = '<p>You have no orders yet.</p>';
+                    return;
+                }
+                container.innerHTML = orders.map(order => `
+                    <div class="card mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h4>Order #${order._id.substring(0, 8)}</h4>
+                            <div>
+                                <span class="badge badge-${order.status.toLowerCase()}">${order.status}</span>
+                                ${order.status === 'Pending' ? `<button class="btn btn-sm btn-danger ml-2" onclick="cancelOrder('${order._id}')">Cancel</button>` : ''}
+                            </div>
+                        </div>
+                        <p><strong>Total:</strong> ₹${order.totalAmount.toFixed(2)}</p>
+                        <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+                        <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--border-color);">
+                        <p><strong>Items:</strong></p>
+                        <ul>
+                            ${order.items.map(item => `<li>${item.medicine?.medicineName || 'Unknown'} (x${item.quantity}) - ₹${(item.price * item.quantity).toFixed(2)}</li>`).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+            }).catch(() => {
+                container.innerHTML = '<p>Failed to load orders.</p>';
+            });
+        }
+        
+        async function cancelOrder(orderId) {
+            if(!confirm('Are you sure you want to cancel this order?')) return;
+            try {
+                await fetchAPI(`/orders/${orderId}/cancel`, { method: 'PUT' });
+                showToast('Order cancelled successfully');
+                initOrders();
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>

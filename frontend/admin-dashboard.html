@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PharmaPlus</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Pharma<span>Admin</span></a>
+            <div class="nav-links">
+                <a href="#" class="logout-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <a href="admin-dashboard.html" class="active">Dashboard</a>
+                <a href="admin-medicines.html">Medicines</a>
+                <a href="admin-categories.html">Categories</a>
+                <a href="admin-orders.html">Orders</a>
+                <a href="admin-users.html">Users</a>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <h2 class="mb-4">Dashboard Overview</h2>
+            
+            <div class="grid" id="stats-grid">
+                <div class="loader"></div>
+            </div>
+
+            <h3 class="mt-5 mb-3">Recent Orders</h3>
+            <div class="card table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-orders-table">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        function initAdminDashboard() {
+            if(!isAdmin()) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            fetchAPI('/dashboard').then(data => {
+                document.getElementById('stats-grid').innerHTML = `
+                    <div class="card text-center">
+                        <h3>Total Medicines</h3>
+                        <p style="font-size: 2.5rem; color: var(--primary-blue); font-weight: bold;">${data.totalMedicines}</p>
+                    </div>
+                    <div class="card text-center">
+                        <h3>Total Categories</h3>
+                        <p style="font-size: 2.5rem; color: var(--primary-blue); font-weight: bold;">${data.totalCategories}</p>
+                    </div>
+                    <div class="card text-center">
+                        <h3>Total Users</h3>
+                        <p style="font-size: 2.5rem; color: var(--primary-green); font-weight: bold;">${data.totalUsers}</p>
+                    </div>
+                    <div class="card text-center">
+                        <h3>Total Orders</h3>
+                        <p style="font-size: 2.5rem; color: var(--warning); font-weight: bold;">${data.totalOrders}</p>
+                    </div>
+                    <div class="card text-center">
+                        <h3>Total Revenue</h3>
+                        <p style="font-size: 2.5rem; color: var(--success); font-weight: bold;">₹${data.revenue.toFixed(2)}</p>
+                    </div>
+                    <div class="card text-center" style="border: 2px solid var(--danger);">
+                        <h3 style="color: var(--danger);">Low Stock Alerts</h3>
+                        <p style="font-size: 2.5rem; color: var(--danger); font-weight: bold;">${data.lowStockMedicines.length}</p>
+                    </div>
+                `;
+
+                document.getElementById('recent-orders-table').innerHTML = data.recentOrders.map(order => `
+                    <tr>
+                        <td>#${order._id.substring(0,8)}</td>
+                        <td>${order.user?.name || 'Unknown'}</td>
+                        <td>₹${order.totalAmount.toFixed(2)}</td>
+                        <td><span class="badge badge-${order.status.toLowerCase()}">${order.status}</span></td>
+                        <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+                
+                // Add Low Stock Medicines Table if they exist
+                if (data.lowStockMedicines.length > 0) {
+                    const lowStockHtml = `
+                        <h3 class="mt-5 mb-3" style="color: var(--danger);">Low Stock Medicines</h3>
+                        <div class="card table-responsive" style="border-left: 4px solid var(--danger);">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Medicine Name</th>
+                                        <th>Brand</th>
+                                        <th>Current Stock</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.lowStockMedicines.map(med => `
+                                        <tr>
+                                            <td><strong>${med.medicineName}</strong></td>
+                                            <td>${med.brand}</td>
+                                            <td style="color: var(--danger); font-weight: bold;">${med.stock}</td>
+                                            <td>₹${med.price.toFixed(2)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    document.querySelector('.main-content').insertAdjacentHTML('beforeend', lowStockHtml);
+                }
+            }).catch(e => {
+                showToast('Failed to load dashboard data', 'error');
+            });
+        }
+    </script>
+</body>
+</html>
